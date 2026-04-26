@@ -100,7 +100,13 @@ export default function Portfolio() {
       const { data: settsData, error: settsErr } = await supabase.from('site_settings').select('*').eq('id', 1).single();
       if (settsData) setSettings(settsData);
 
-      const { data: testData } = await supabase.from('comments').select('*').eq('article_id', 'home').eq('is_approved', true).order('created_at', { ascending: false });
+      // Testimonials: comments with null article_id (not linked to any article)
+      const { data: testData } = await supabase
+        .from('comments')
+        .select('*')
+        .is('article_id', null)
+        .eq('is_approved', true)
+        .order('created_at', { ascending: false });
       if (testData) setTestimonials(testData);
     };
     fetchData();
@@ -147,9 +153,9 @@ export default function Portfolio() {
 
       const payload = JSON.stringify({ text: tContent, image: imageUrl });
 
+      // Insert with null article_id to mark as homepage testimonial
       const { error } = await supabase.from('comments').insert([{
-        article_id: 'home',
-        name: tName,
+        author_name: tName,
         content: payload,
         is_approved: false
       }]);
@@ -471,7 +477,7 @@ export default function Portfolio() {
                         </div>
                       )}
                       <div>
-                        <h4 className="font-bold text-neutral-900 leading-none">{t.name}</h4>
+                        <h4 className="font-bold text-neutral-900 leading-none">{t.author_name}</h4>
                         <span className="text-xs text-neutral-500 uppercase tracking-widest mt-1 block">Verified Guest</span>
                       </div>
                     </div>

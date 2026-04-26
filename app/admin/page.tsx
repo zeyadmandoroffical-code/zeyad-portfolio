@@ -344,9 +344,9 @@ export default function AdminPage() {
                               )}
                               <div>
                                 <h3 className="font-bold text-neutral-900 leading-tight">
-                                  {comment.name} 
-                                  <span className={`text-xs font-bold ml-2 px-2 py-0.5 rounded-full ${comment.article_id === 'home' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                                    {comment.article_id === 'home' ? 'Homepage Testimonial' : `Article ID: ${comment.article_id}`}
+                                  {comment.author_name} 
+                                  <span className={`text-xs font-bold ml-2 px-2 py-0.5 rounded-full ${!comment.article_id ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                                    {!comment.article_id ? 'Homepage Testimonial' : `Article: ${comment.article_id?.slice(0, 8)}...`}
                                   </span>
                                 </h3>
                                 <p className="text-sm text-neutral-700 mt-2 whitespace-pre-wrap font-medium">{parsed.text}</p>

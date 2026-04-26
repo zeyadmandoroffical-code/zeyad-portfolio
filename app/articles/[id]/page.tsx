@@ -6,7 +6,7 @@ import { supabase } from '@/utils/supabase';
 import { GlobalBackground } from '@/components/GlobalBackground';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, User } from 'lucide-react';
 import { useParams } from 'next/navigation';
 
 export default function ArticlePage() {
@@ -15,7 +15,9 @@ export default function ArticlePage() {
   const [loading, setLoading] = useState(true);
   
   const [comments, setComments] = useState<any[]>([]);
-  const [commentForm, setCommentForm] = useState({ name: '', content: '' });
+  const [commentName, setCommentName] = useState('');
+  const [commentContent, setCommentContent] = useState('');
+  const [commentImage, setCommentImage] = useState<File | null>(null);
   const [commentStatus, setCommentStatus] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
@@ -25,8 +27,13 @@ export default function ArticlePage() {
       const { data: articleData } = await supabase.from('articles').select('*').eq('id', id).single();
       if (articleData) setArticle(articleData);
       
-      const { data: commentsData, error: commentsError } = await supabase.from('comments').select('*').eq('article_id', id).order('created_at', { ascending: false });
-      console.log('Comments fetched:', commentsData, 'Error:', commentsError);
+      // Only show approved comments for article
+      const { data: commentsData } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('article_id', id)
+        .eq('is_approved', true)
+        .order('created_at', { ascending: true });
       if (commentsData) setComments(commentsData);
       
       setLoading(false);
@@ -36,19 +43,37 @@ export default function ArticlePage() {
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!commentForm.name || !commentForm.content) return;
+    if (!commentName || !commentContent) return;
     setIsSubmittingComment(true);
     setCommentStatus('');
     try {
-      console.log('Submitting comment for article:', id, commentForm);
-      const { error, data } = await supabase.from('comments').insert([{ article_id: id, name: commentForm.name, content: commentForm.content, is_approved: false }]).select('*');
-      console.log('Insert attempt:', data, 'Error:', error);
+      let imageUrl: string | null = null;
+      if (commentImage) {
+        const fileExt = commentImage.name.split('.').pop();
+        const fileName = `comment_${Math.random()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, commentImage);
+        if (!uploadError) {
+          const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(fileName);
+          imageUrl = urlData.publicUrl;
+        }
+      }
+
+      const payload = JSON.stringify({ text: commentContent, image: imageUrl });
+
+      const { error } = await supabase.from('comments').insert([{
+        article_id: id,
+        author_name: commentName,
+        content: payload,
+        is_approved: false
+      }]);
+
       if (error) throw error;
-      setCommentStatus('Your comment is awaiting approval!');
-      setCommentForm({ name: '', content: '' });
+      setCommentStatus('success');
+      setCommentName('');
+      setCommentContent('');
+      setCommentImage(null);
     } catch (err: any) {
-      console.error(err);
-      setCommentStatus('Error submitting comment.');
+      setCommentStatus('error');
     } finally {
       setIsSubmittingComment(false);
     }
@@ -123,36 +148,95 @@ export default function ArticlePage() {
 
         {/* Comments Section */}
         <section className="mt-16 mb-20 relative z-20">
-          <h3 className="text-3xl font-black text-neutral-900 mb-8">Comments</h3>
+          <h3 className="text-3xl font-black text-neutral-900 mb-8">Discussion</h3>
           
-          <div className="bg-white/30 backdrop-blur-[20px] will-change-transform border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.06)] rounded-[2.5rem] p-8 md:p-10 mb-10">
-            <h4 className="text-xl font-bold mb-6 text-neutral-800">Leave a reply</h4>
+          {/* Leave a Comment Form */}
+          <div className="bg-white/30 backdrop-blur-[20px] border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.06)] rounded-[2.5rem] p-8 md:p-10 mb-10">
+            <h4 className="text-xl font-black mb-1 text-neutral-900 uppercase tracking-widest">Leave a Reply</h4>
+            <p className="text-sm text-neutral-500 font-medium mb-6">Your comment will appear after review.</p>
             <form onSubmit={handleCommentSubmit} className="flex flex-col gap-5">
+              <input
+                required
+                type="text"
+                value={commentName}
+                onChange={(e) => setCommentName(e.target.value)}
+                placeholder="Your Name"
+                className="w-full bg-white/40 border border-white/60 p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 transition font-bold text-neutral-900"
+              />
+              <textarea
+                required
+                rows={4}
+                value={commentContent}
+                onChange={(e) => setCommentContent(e.target.value)}
+                placeholder="Your Comment"
+                className="w-full bg-white/40 border border-white/60 p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 transition font-medium resize-none text-neutral-900"
+              />
               <div className="flex flex-col gap-2">
-                <input required type="text" value={commentForm.name} onChange={(e) => setCommentForm({ ...commentForm, name: e.target.value })} placeholder="Your Name" className="w-full bg-white/40 border border-white/60 p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 transition shadow-inner font-medium text-neutral-900" />
+                <label className="text-xs font-bold uppercase text-neutral-500 tracking-wider">Your Photo (Optional)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setCommentImage(e.target.files?.[0] || null)}
+                  className="w-full bg-white/40 border border-white/60 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 text-sm font-medium file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-neutral-900 file:text-white"
+                />
               </div>
-              <div className="flex flex-col gap-2">
-                <textarea required rows={4} value={commentForm.content} onChange={(e) => setCommentForm({ ...commentForm, content: e.target.value })} placeholder="Your Comment" className="w-full bg-white/40 border border-white/60 p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 transition shadow-inner font-medium resize-none text-neutral-900" />
-              </div>
-              <button disabled={isSubmittingComment} type="submit" className="mt-2 bg-neutral-900 text-white font-black py-4 px-8 rounded-xl tracking-widest uppercase hover:bg-black transition-all disabled:opacity-50 self-start">
+              <button
+                disabled={isSubmittingComment}
+                type="submit"
+                className="mt-2 bg-neutral-900 text-white font-black py-4 px-8 rounded-xl tracking-widest uppercase hover:bg-black transition-all disabled:opacity-50 self-start"
+              >
                 {isSubmittingComment ? 'Submitting...' : 'Post Comment'}
               </button>
-              {commentStatus && (
-                <div className="mt-2 text-sm font-bold text-blue-600 bg-blue-50/50 p-3 rounded-lg inline-block border border-blue-100">{commentStatus}</div>
+              {commentStatus === 'success' && (
+                <div className="mt-2 text-sm font-bold text-green-700 bg-green-50/80 p-4 rounded-xl border border-green-200">
+                  ✅ Your comment is awaiting approval. Thank you!
+                </div>
+              )}
+              {commentStatus === 'error' && (
+                <div className="mt-2 text-sm font-bold text-red-600 bg-red-50/80 p-4 rounded-xl border border-red-200">
+                  ❌ Something went wrong. Please try again.
+                </div>
               )}
             </form>
           </div>
 
+          {/* Approved Comments Display */}
           <div className="flex flex-col gap-6">
             {comments.length > 0 ? (
-              comments.map((comment, index) => (
-                <motion.div key={comment.id || index} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white/40 border border-white/60 p-6 rounded-2xl shadow-sm">
-                  <h5 className="font-bold text-neutral-900 text-lg">{comment.name} {comment.is_approved ? '' : <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded-full ml-2">Pending</span>}</h5>
-                  <p className="text-neutral-600 mt-2 whitespace-pre-wrap">{comment.content}</p>
-                </motion.div>
-              ))
+              comments.map((comment, index) => {
+                let parsed;
+                try { parsed = JSON.parse(comment.content); } catch { parsed = { text: comment.content, image: null }; }
+                return (
+                  <motion.div
+                    key={comment.id || index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="bg-white/40 border border-white/60 p-6 rounded-2xl shadow-sm flex gap-4 items-start"
+                  >
+                    {parsed.image ? (
+                      <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/60 shadow-md shrink-0">
+                        <Image src={parsed.image} alt={comment.author_name} width={48} height={48} className="object-cover w-full h-full" />
+                      </div>
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-blue-100 border-2 border-white/60 shadow-md shrink-0 flex items-center justify-center">
+                        <User className="text-blue-500 w-5 h-5" />
+                      </div>
+                    )}
+                    <div>
+                      <h5 className="font-black text-neutral-900">{comment.author_name}</h5>
+                      <p className="text-sm text-neutral-400 mb-2 font-medium">
+                        {new Date(comment.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </p>
+                      <p className="text-neutral-700 font-medium leading-relaxed">{parsed.text}</p>
+                    </div>
+                  </motion.div>
+                );
+              })
             ) : (
-              <p className="text-neutral-500 font-medium bg-white/30 p-6 rounded-2xl border border-white/60 text-center">No comments yet. Be the first to start the discussion!</p>
+              <p className="text-neutral-500 font-medium bg-white/30 p-6 rounded-2xl border border-white/60 text-center">
+                No comments yet. Be the first to start the discussion!
+              </p>
             )}
           </div>
         </section>
