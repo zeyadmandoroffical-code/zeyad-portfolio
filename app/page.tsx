@@ -99,12 +99,7 @@ const TestimonialCard = ({ t, index }: { t: any; index: number }) => {
         "{parsed.text}"
       </p>
 
-      {/* Badge */}
-      {parsed.badge && (
-        <span className={`self-start text-[10px] font-black uppercase tracking-[0.15em] px-3 py-1 rounded-full ${getBadgeClass(parsed.badgeColor)}`}>
-          {parsed.badge}
-        </span>
-      )}
+
 
       {/* Author */}
       <div className="flex items-center gap-3 pt-3 border-t border-white/40">
