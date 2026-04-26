@@ -83,6 +83,14 @@ const EditorialPhoto = ({ src }: { src: string | null }) => {
 export default function Portfolio() {
   const [articles, setArticles] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(null);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  
+  // Testimonial Form State
+  const [tName, setTName] = useState('');
+  const [tContent, setTContent] = useState('');
+  const [tImageFile, setTImageFile] = useState<File | null>(null);
+  const [isSubmittingT, setIsSubmittingT] = useState(false);
+  const [tStatus, setTStatus] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -90,8 +98,10 @@ export default function Portfolio() {
       if (artData) setArticles(artData);
 
       const { data: settsData, error: settsErr } = await supabase.from('site_settings').select('*').eq('id', 1).single();
-      console.log('Site Data:', settsData, 'Error:', settsErr);
       if (settsData) setSettings(settsData);
+
+      const { data: testData } = await supabase.from('comments').select('*').eq('article_id', 'home').eq('is_approved', true).order('created_at', { ascending: false });
+      if (testData) setTestimonials(testData);
     };
     fetchData();
   }, []);
@@ -116,6 +126,44 @@ export default function Portfolio() {
       clean = '20' + clean.substring(1);
     }
     return `https://wa.me/${clean}`;
+  };
+
+  const handleTestimonialSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tName || !tContent) return;
+    setIsSubmittingT(true);
+    setTStatus('Uploading...');
+
+    try {
+      let imageUrl = null;
+      if (tImageFile) {
+        const fileExt = tImageFile.name.split('.').pop();
+        const fileName = `testimonial_${Math.random()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, tImageFile);
+        if (uploadError) throw uploadError;
+        const { data } = supabase.storage.from('avatars').getPublicUrl(fileName);
+        imageUrl = data.publicUrl;
+      }
+
+      const payload = JSON.stringify({ text: tContent, image: imageUrl });
+
+      const { error } = await supabase.from('comments').insert([{
+        article_id: 'home',
+        name: tName,
+        content: payload,
+        is_approved: false
+      }]);
+
+      if (error) throw error;
+      setTStatus('Thank you! Your testimonial is awaiting approval.');
+      setTName('');
+      setTContent('');
+      setTImageFile(null);
+    } catch (err: any) {
+      setTStatus('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmittingT(false);
+    }
   };
 
   return (
@@ -382,9 +430,91 @@ export default function Portfolio() {
           </div>
         </section>
 
+        {/* 6. GUESTBOOK / TESTIMONIALS */}
+        <section id="testimonials" className="py-32">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="mb-20 text-center"
+          >
+            <h2 className="text-6xl font-black tracking-tighter text-neutral-900 mb-4">Wall of Love</h2>
+            <p className="text-xl text-neutral-600 font-medium max-w-2xl mx-auto">What partners, clients, and friends say about the journey.</p>
+          </motion.div>
+
+          {/* Testimonial Grid */}
+          {testimonials.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+              {testimonials.map((t, i) => {
+                let parsed;
+                try { parsed = JSON.parse(t.content); } catch { parsed = { text: t.content, image: null }; }
+                return (
+                  <motion.div 
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className={`p-8 ${glassCard} flex flex-col justify-between`}
+                  >
+                    <p className="text-lg text-neutral-700 font-medium italic mb-8 relative z-10 leading-relaxed">
+                      "{parsed.text}"
+                    </p>
+                    <div className="flex items-center gap-4">
+                      {parsed.image ? (
+                        <div className="w-14 h-14 rounded-full overflow-hidden shadow-md border-2 border-white/60">
+                          <Image src={parsed.image} alt={t.name} width={56} height={56} className="object-cover w-full h-full" />
+                        </div>
+                      ) : (
+                        <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center shadow-md border-2 border-white/60">
+                          <Users className="text-blue-500 w-6 h-6" />
+                        </div>
+                      )}
+                      <div>
+                        <h4 className="font-bold text-neutral-900 leading-none">{t.name}</h4>
+                        <span className="text-xs text-neutral-500 uppercase tracking-widest mt-1 block">Verified Guest</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Leave a Testimonial Form */}
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className={`max-w-2xl mx-auto p-8 md:p-12 ${glassBase} border-2 border-blue-500/20`}
+          >
+            <h3 className="text-2xl font-black text-center mb-2 uppercase tracking-widest text-neutral-900">Leave Your Mark</h3>
+            <p className="text-center text-neutral-500 mb-8 font-medium text-sm">Submit your picture, name, and comment.</p>
+            
+            <form onSubmit={handleTestimonialSubmit} className="flex flex-col gap-5">
+              <input required type="text" value={tName} onChange={(e) => setTName(e.target.value)} placeholder="Your Name" className="w-full bg-white/40 border border-white/60 p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 font-bold" />
+              <textarea required rows={3} value={tContent} onChange={(e) => setTContent(e.target.value)} placeholder="Your Feedback or Testimonial" className="w-full bg-white/40 border border-white/60 p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 font-medium resize-none" />
+              
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold uppercase text-neutral-500 tracking-wider">Your Photo (Optional)</label>
+                <input type="file" accept="image/*" onChange={(e) => setTImageFile(e.target.files?.[0] || null)} className="w-full bg-white/40 border border-white/60 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 text-sm font-medium file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-neutral-900 file:text-white" />
+              </div>
+
+              <button type="submit" disabled={isSubmittingT} className="mt-4 bg-blue-600 text-white font-black py-4 rounded-xl uppercase tracking-widest hover:bg-blue-700 transition disabled:opacity-50">
+                {isSubmittingT ? 'Uploading...' : 'Submit to Wall'}
+              </button>
+              
+              {tStatus && (
+                <p className={`text-center font-bold text-sm tracking-wide mt-2 ${tStatus.includes('awaiting') ? 'text-green-600' : 'text-neutral-600'}`}>{tStatus}</p>
+              )}
+            </form>
+          </motion.div>
+
+        </section>
+
       </main>
       
-      {/* 6. FLOATING SOCIAL DOCK */}
+      {/* 7. FLOATING SOCIAL DOCK */}
       {settings && (
         <motion.div 
           initial={{ y: 50, opacity: 0, x: "-50%" }}

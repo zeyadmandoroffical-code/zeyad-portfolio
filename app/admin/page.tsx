@@ -333,22 +333,36 @@ export default function AdminPage() {
                     {comments.length === 0 ? (
                       <p className="text-neutral-500 font-medium">No pending comments in queue.</p>
                     ) : (
-                      comments.map((comment) => (
-                        <div key={comment.id} className="flex flex-col gap-3 p-4 bg-white/40 rounded-xl border border-white/60 shadow-sm transition hover:bg-white/60">
-                          <div>
-                            <h3 className="font-bold text-neutral-900">{comment.name} <span className="text-xs text-neutral-500 font-normal ml-2">on Article ID: {comment.article_id}</span></h3>
-                            <p className="text-sm text-neutral-700 mt-1 whitespace-pre-wrap">{comment.content}</p>
+                      comments.map((comment) => {
+                        let parsed;
+                        try { parsed = JSON.parse(comment.content); } catch { parsed = { text: comment.content, image: null }; }
+                        return (
+                          <div key={comment.id} className="flex flex-col gap-4 p-5 bg-white/40 rounded-xl border border-white/60 shadow-sm transition hover:bg-white/60">
+                            <div className="flex items-start gap-4">
+                              {parsed.image && (
+                                <Image src={parsed.image} alt={comment.name} width={50} height={50} className="w-12 h-12 rounded-full object-cover border border-white/60 shadow-sm shrink-0" />
+                              )}
+                              <div>
+                                <h3 className="font-bold text-neutral-900 leading-tight">
+                                  {comment.name} 
+                                  <span className={`text-xs font-bold ml-2 px-2 py-0.5 rounded-full ${comment.article_id === 'home' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                                    {comment.article_id === 'home' ? 'Homepage Testimonial' : `Article ID: ${comment.article_id}`}
+                                  </span>
+                                </h3>
+                                <p className="text-sm text-neutral-700 mt-2 whitespace-pre-wrap font-medium">{parsed.text}</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2 mt-2 pt-4 border-t border-white/40">
+                              <button onClick={() => handleApproveComment(comment.id)} disabled={loading} className="px-5 py-2 bg-green-100 text-green-700 hover:bg-green-200 font-black tracking-widest uppercase text-xs rounded-lg transition disabled:opacity-50">
+                                Approve
+                              </button>
+                              <button onClick={() => handleDeleteComment(comment.id)} disabled={loading} className="px-5 py-2 bg-red-100 text-red-600 hover:bg-red-200 font-black tracking-widest uppercase text-xs rounded-lg transition disabled:opacity-50">
+                                Delete
+                              </button>
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            <button onClick={() => handleApproveComment(comment.id)} disabled={loading} className="px-4 py-2 bg-green-100 text-green-700 hover:bg-green-200 font-bold text-sm tracking-wide rounded-lg transition disabled:opacity-50">
-                              Approve
-                            </button>
-                            <button onClick={() => handleDeleteComment(comment.id)} disabled={loading} className="px-4 py-2 bg-red-100 text-red-600 hover:bg-red-200 font-bold text-sm tracking-wide rounded-lg transition disabled:opacity-50">
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                      ))
+                        );
+                      })
                     )}
                   </div>
                 </div>
