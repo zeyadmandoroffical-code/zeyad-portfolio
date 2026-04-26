@@ -14,7 +14,7 @@ import { supabase } from "@/utils/supabase";
  * THE ULTIMATE GLASS RECIPE
  * Applied strictly globally for 100% pure refraction.
  */
-const glassBase = "bg-white/30 backdrop-blur-[40px] border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.06)] rounded-[2.5rem]";
+const glassBase = "bg-white/30 backdrop-blur-[20px] will-change-transform border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.06)] rounded-[2.5rem]";
 const glassHover = "transition-all duration-500 hover:scale-[1.03] hover:bg-white/40 hover:shadow-[0_12px_45px_0_rgba(31,38,135,0.1)] cursor-pointer";
 const glassCard = `${glassBase} ${glassHover}`;
 
@@ -25,6 +25,7 @@ const springConfig = {
 };
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { GlobalBackground } from '@/components/GlobalBackground';
 
 /**
@@ -45,24 +46,33 @@ const EditorialPhoto = ({ src }: { src: string | null }) => {
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
         className={`relative w-full h-full rounded-[3rem] border-[8px] border-white/40 backdrop-blur-3xl shadow-xl p-2 ${glassBase}`}
       >
-        {/* Image Mask */}
         <div className="w-full h-full rounded-[2.2rem] overflow-hidden bg-neutral-100 shadow-inner relative flex items-center justify-center">
           {src ? (
             <>
-              <motion.img 
-                src={src} 
-                alt="Zeyad Mandor" 
+              <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: loaded ? 1 : 0 }}
                 transition={{ duration: 0.8 }}
-                onLoad={() => setLoaded(true)}
-                className="w-full h-full object-cover absolute inset-0 z-10"
-              />
+                className="absolute inset-0 z-10"
+              >
+                <Image 
+                  src={src} 
+                  alt="Zeyad Mandor" 
+                  fill
+                  className="object-cover"
+                  onLoad={() => setLoaded(true)}
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  priority
+                />
+              </motion.div>
               {/* Fallback while loading */}
               {!loaded && <div className="absolute inset-0 bg-gradient-to-br from-slate-200 via-white to-slate-300 animate-pulse z-0" />}
             </>
           ) : (
-            <div className="w-full h-full absolute inset-0 bg-gradient-to-br from-slate-200 via-white to-slate-300 animate-pulse z-0" />
+            <div className="w-full h-full absolute inset-0 bg-gradient-to-br from-blue-50/40 via-white/60 to-indigo-50/40 backdrop-blur-[20px] shadow-inner flex flex-col items-center justify-center z-0 animate-pulse border border-white/80">
+               <Users className="w-16 h-16 text-blue-300 drop-shadow-md mb-2" strokeWidth={1.5} />
+               <span className="text-sm font-bold text-blue-300/80 tracking-widest uppercase">Founder</span>
+            </div>
           )}
         </div>
       </motion.div>
@@ -79,7 +89,8 @@ export default function Portfolio() {
       const { data: artData } = await supabase.from('articles').select('*').order('created_at', { ascending: false });
       if (artData) setArticles(artData);
 
-      const { data: settsData } = await supabase.from('site_settings').select('*').eq('id', 1).single();
+      const { data: settsData, error: settsErr } = await supabase.from('site_settings').select('*').eq('id', 1).single();
+      console.log('Site Data:', settsData, 'Error:', settsErr);
       if (settsData) setSettings(settsData);
     };
     fetchData();
@@ -107,7 +118,7 @@ export default function Portfolio() {
         initial={{ y: -50, opacity: 0, x: "-50%" }}
         animate={{ y: 0, opacity: 1, x: "-50%" }}
         transition={springConfig}
-        className={`fixed top-6 left-1/2 z-50 px-3 py-2 flex items-center bg-white/30 backdrop-blur-[40px] border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.06)] !rounded-full`}
+        className={`fixed top-6 left-1/2 z-50 px-3 py-2 flex items-center bg-white/30 backdrop-blur-[20px] will-change-transform border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.06)] !rounded-full`}
       >
         <div className="flex items-center gap-8 px-6 hidden sm:flex">
           {['Projects', 'Vault', 'Journey'].map((item) => (
@@ -274,12 +285,12 @@ export default function Portfolio() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ ...springConfig, delay: i * 0.1 }}
-                  className={`p-6 flex flex-col justify-between h-full bg-white/30 backdrop-blur-[40px] border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.06)] rounded-[2.5rem] hover:scale-[1.02] hover:-translate-y-2 hover:bg-white/40 transition-all duration-500 cursor-pointer`}
+                  className={`p-6 flex flex-col justify-between h-full bg-white/30 backdrop-blur-[20px] will-change-transform border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.06)] rounded-[2.5rem] hover:scale-[1.02] hover:-translate-y-2 hover:bg-white/40 transition-all duration-500 cursor-pointer`}
                 >
                   {/* Image Placeholder */}
                   {article.image_url ? (
-                    <div className="w-full rounded-2xl h-48 mb-6 overflow-hidden">
-                      <img src={article.image_url} alt={article.title} className="w-full h-full object-cover" />
+                    <div className="w-full relative rounded-2xl h-48 mb-6 overflow-hidden">
+                      <Image src={article.image_url} alt={article.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
                     </div>
                   ) : (
                     <div className="w-full bg-black/5 rounded-2xl h-48 mb-6 shadow-inner flex items-center justify-center relative overflow-hidden">
@@ -368,7 +379,7 @@ export default function Portfolio() {
           initial={{ y: 50, opacity: 0, x: "-50%" }}
           animate={{ y: 0, opacity: 1, x: "-50%" }}
           transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.5 }}
-          className={`fixed bottom-6 left-1/2 z-50 px-6 py-4 flex items-center gap-6 bg-white/30 backdrop-blur-[40px] border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.06)] rounded-full`}
+          className={`fixed bottom-6 left-1/2 z-50 px-6 py-4 flex items-center gap-6 bg-white/30 backdrop-blur-[20px] will-change-transform border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.06)] rounded-full`}
         >
           {settings.linkedin_url && (
             <a href={settings.linkedin_url} target="_blank" rel="noreferrer" className="text-neutral-600 hover:text-blue-600 hover:scale-110 transition-transform">
