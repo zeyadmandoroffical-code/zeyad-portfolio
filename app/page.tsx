@@ -120,7 +120,14 @@ const TestimonialCard = ({ t, index }: { t: any; index: number }) => {
         <div className="min-w-0">
           <h4 className="font-black text-neutral-900 text-sm leading-tight truncate">{t.author_name}</h4>
           {parsed.job && <p className="text-[11px] text-neutral-400 font-medium tracking-wide mt-0.5 truncate">{parsed.job}</p>}
-          <span className="text-[10px] text-neutral-400 uppercase tracking-widest font-bold">Verified Guest</span>
+          {parsed.badge ? (
+            <span
+              className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full mt-0.5 inline-block"
+              style={{ backgroundColor: (parsed.badgeColor || '#8b5cf6') + '22', color: parsed.badgeColor || '#8b5cf6' }}
+            >
+              {parsed.badge}
+            </span>
+          ) : null}
         </div>
       </div>
     </motion.div>
