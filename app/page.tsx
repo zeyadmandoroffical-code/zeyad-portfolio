@@ -109,6 +109,15 @@ export default function Portfolio() {
     }
   }, [settings?.profile_image_url]);
 
+  const getWhatsAppLink = (numberStr: string | null | undefined) => {
+    if (!numberStr) return '#';
+    let clean = numberStr.replace(/[^0-9]/g, '');
+    if (clean.startsWith('01') && clean.length === 11) {
+      clean = '20' + clean.substring(1);
+    }
+    return `https://wa.me/${clean}`;
+  };
+
   return (
     <div className="relative w-full text-neutral-900 pb-32 font-sans selection:bg-blue-500/20 selection:text-neutral-900 overflow-hidden">
       <GlobalBackground />
@@ -134,7 +143,9 @@ export default function Portfolio() {
           ))}
         </div>
         <motion.a 
-          href={settings?.whatsapp_number ? `https://wa.me/${settings.whatsapp_number.replace(/[^0-9]/g, '')}` : '#'}
+          href={getWhatsAppLink(settings?.whatsapp_number)}
+          target="_blank"
+          rel="noopener noreferrer"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className="ml-2 sm:ml-6 bg-neutral-900 text-white rounded-full px-7 py-3 text-[13px] font-extrabold tracking-wide uppercase shadow-[0_4px_14px_0_inherit] hover:bg-black hover:shadow-[0_6px_20px_rgba(0,0,0,0.23)] hover:-translate-y-0.5 transition-all duration-300 inline-block text-center"
@@ -379,23 +390,17 @@ export default function Portfolio() {
           initial={{ y: 50, opacity: 0, x: "-50%" }}
           animate={{ y: 0, opacity: 1, x: "-50%" }}
           transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.5 }}
-          className={`fixed bottom-6 left-1/2 z-50 px-6 py-4 flex items-center gap-6 bg-white/30 backdrop-blur-[20px] will-change-transform border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.06)] rounded-full`}
+          className={`fixed bottom-6 left-1/2 z-50 px-6 py-4 flex items-center gap-6 bg-white/30 backdrop-blur-[20px] border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.06)] rounded-full`}
         >
-          {settings.linkedin_url && (
-            <a href={settings.linkedin_url} target="_blank" rel="noreferrer" className="text-neutral-600 hover:text-blue-600 hover:scale-110 transition-transform">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
-            </a>
-          )}
-          {settings.instagram_url && (
-            <a href={settings.instagram_url} target="_blank" rel="noreferrer" className="text-neutral-600 hover:text-pink-600 hover:scale-110 transition-transform">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-            </a>
-          )}
-          {settings.facebook_url && (
-            <a href={settings.facebook_url} target="_blank" rel="noreferrer" className="text-neutral-600 hover:text-blue-800 hover:scale-110 transition-transform">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-            </a>
-          )}
+          <a href={settings.linkedin_url || '#'} target="_blank" rel="noreferrer" className={`transition-transform ${settings.linkedin_url ? 'text-neutral-600 hover:text-blue-600 hover:scale-110' : 'text-neutral-400 opacity-50 cursor-pointer hover:scale-100'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+          </a>
+          <a href={settings.instagram_url || '#'} target="_blank" rel="noreferrer" className={`transition-transform ${settings.instagram_url ? 'text-neutral-600 hover:text-pink-600 hover:scale-110' : 'text-neutral-400 opacity-50 cursor-pointer hover:scale-100'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+          </a>
+          <a href={settings.facebook_url || '#'} target="_blank" rel="noreferrer" className={`transition-transform ${settings.facebook_url ? 'text-neutral-600 hover:text-blue-800 hover:scale-110' : 'text-neutral-400 opacity-50 cursor-pointer hover:scale-100'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+          </a>
         </motion.div>
       )}
 
