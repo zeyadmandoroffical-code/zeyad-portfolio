@@ -5,7 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/utils/supabase';
 import { GlobalBackground } from '@/components/GlobalBackground';
 import Image from 'next/image';
-import { Star, Trash2, CheckCircle, XCircle, ChevronUp, ChevronDown, Users, Eye, Heart } from 'lucide-react';
+import { Star, Trash2, CheckCircle, XCircle, ChevronUp, ChevronDown, Users, Eye, Heart, Upload, FileImage, ToggleLeft, ToggleRight, ExternalLink } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const glass = "bg-white/30 backdrop-blur-[20px] will-change-transform border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.06)] rounded-[2.5rem]";
 
@@ -48,7 +50,9 @@ export default function AdminPage() {
 
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingArticleImage, setUploadingArticleImage] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     fetchArticles();
@@ -168,14 +172,14 @@ export default function AdminPage() {
     fetchArticles();
   };
 
-  // ── Image Upload ─────────────────────────────────────────────────
+  // ── Profile Image Upload ─────────────────────────────────────────
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadingImage(true); setStatusMessage('');
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
+      const fileName = `profile_${Date.now()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file);
       if (uploadError) throw uploadError;
       const { data } = supabase.storage.from('avatars').getPublicUrl(fileName);
@@ -185,6 +189,23 @@ export default function AdminPage() {
       setStatusMessage('✅ Photo uploaded & saved!');
     } catch (err: any) { setStatusMessage(`❌ ${err.message}`); }
     finally { setUploadingImage(false); }
+  };
+
+  // ── Article Image Upload ─────────────────────────────────────────
+  const handleArticleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingArticleImage(true); setStatusMessage('');
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `article_${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data } = supabase.storage.from('avatars').getPublicUrl(fileName);
+      setArticleForm((p: any) => ({ ...p, image_url: data.publicUrl }));
+      setStatusMessage('✅ Article image uploaded!');
+    } catch (err: any) { setStatusMessage(`❌ ${err.message}`); }
+    finally { setUploadingArticleImage(false); }
   };
 
   const handleUpdateSocials = async (e: React.FormEvent) => {
@@ -264,11 +285,71 @@ export default function AdminPage() {
                   <form onSubmit={handleCreateOrUpdateArticle} className="flex flex-col gap-4">
                     <input required value={articleForm.title} onChange={e => setArticleForm((p: any) => ({ ...p, title: e.target.value }))} placeholder="Article Title *" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-bold text-neutral-900" />
                     <input required value={articleForm.category} onChange={e => setArticleForm((p: any) => ({ ...p, category: e.target.value }))} placeholder="Category (e.g. Growth, SaaS) *" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-medium text-neutral-900" />
-                    <input value={articleForm.image_url} onChange={e => setArticleForm((p: any) => ({ ...p, image_url: e.target.value }))} placeholder="Image URL (optional)" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-medium text-neutral-900" />
-                    
-                    <div className="relative">
-                      <div className="absolute top-4 right-4 text-[10px] font-black uppercase text-blue-500 bg-blue-50 px-2 py-1 rounded-md pointer-events-none">Markdown Supported</div>
-                      <textarea required rows={12} value={articleForm.content} onChange={e => setArticleForm((p: any) => ({ ...p, content: e.target.value }))} placeholder="Paste your Article Markdown here... *" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-mono text-sm resize-y text-neutral-900" />
+
+                    {/* Article Cover Image */}
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-black uppercase tracking-wider text-neutral-500">Cover Image</label>
+                      <div className="flex gap-3 flex-wrap items-center">
+                        <label className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-black uppercase tracking-widest cursor-pointer transition-all ${
+                          uploadingArticleImage ? 'bg-blue-100 text-blue-400' : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}>
+                          <Upload size={15} />
+                          {uploadingArticleImage ? 'Uploading…' : 'Upload Image'}
+                          <input type="file" accept="image/*" onChange={handleArticleImageUpload} className="hidden" disabled={uploadingArticleImage} />
+                        </label>
+                        <input
+                          value={articleForm.image_url}
+                          onChange={e => setArticleForm((p: any) => ({ ...p, image_url: e.target.value }))}
+                          placeholder="Or paste image URL"
+                          className="flex-1 min-w-[180px] bg-white/50 border border-white/70 p-3 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-medium text-neutral-900 text-sm"
+                        />
+                      </div>
+                      {articleForm.image_url && (
+                        <div className="relative w-full h-36 rounded-2xl overflow-hidden border border-white/60 shadow-sm">
+                          <Image src={articleForm.image_url} alt="Cover preview" fill className="object-cover" sizes="100vw" />
+                          <button
+                            type="button"
+                            onClick={() => setArticleForm((p: any) => ({ ...p, image_url: '' }))}
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-black hover:bg-red-600 transition shadow"
+                          >✕</button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Markdown Editor + Preview toggle */}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-black uppercase tracking-wider text-neutral-500 flex items-center gap-2">
+                          <FileImage size={13} /> Article Content *
+                          <span className="text-[9px] px-2 py-0.5 bg-blue-50 text-blue-500 rounded-md">Markdown</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setShowPreview(p => !p)}
+                          className="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-xl transition bg-neutral-100 hover:bg-neutral-200 text-neutral-600"
+                        >
+                          {showPreview ? <ToggleRight size={14} className="text-blue-500" /> : <ToggleLeft size={14} />}
+                          {showPreview ? 'Editor' : 'Preview'}
+                        </button>
+                      </div>
+                      {showPreview ? (
+                        <div className="prose prose-sm max-w-none bg-white/60 border border-white/70 p-6 rounded-2xl min-h-[280px] text-neutral-800">
+                          {articleForm.content ? (
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{articleForm.content}</ReactMarkdown>
+                          ) : (
+                            <p className="text-neutral-400 italic">Nothing to preview yet — start writing!</p>
+                          )}
+                        </div>
+                      ) : (
+                        <textarea
+                          required
+                          rows={12}
+                          value={articleForm.content}
+                          onChange={e => setArticleForm((p: any) => ({ ...p, content: e.target.value }))}
+                          placeholder="Write your article in Markdown... *"
+                          className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-mono text-sm resize-y text-neutral-900"
+                        />
+                      )}
                     </div>
 
                     <div className="flex gap-4">
@@ -288,6 +369,11 @@ export default function AdminPage() {
                   <h2 className="text-2xl font-black tracking-tight">Published Articles ({articles.length})</h2>
                   {articles.map(a => (
                     <div key={a.id} className="flex items-center justify-between p-5 bg-white/40 rounded-2xl border border-white/60 gap-4 shadow-sm">
+                      {a.image_url && (
+                        <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 relative border border-white/60 shadow-sm">
+                          <Image src={a.image_url} alt={a.title} fill className="object-cover" sizes="56px" />
+                        </div>
+                      )}
                       <div className="min-w-0 flex-1">
                         <p className="font-black text-neutral-900 truncate">{a.title}</p>
                         <div className="flex items-center gap-4 mt-2">
@@ -297,8 +383,12 @@ export default function AdminPage() {
                         </div>
                       </div>
                       <div className="flex gap-2 shrink-0">
+                        <a href={`/articles/${a.id}`} target="_blank" rel="noreferrer" className="p-3 bg-neutral-50 text-neutral-500 hover:bg-neutral-100 rounded-xl transition">
+                          <ExternalLink size={16} />
+                        </a>
                         <button onClick={() => {
                           setArticleForm({ id: a.id, title: a.title, category: a.category, image_url: a.image_url || '', content: a.content });
+                          setShowPreview(false);
                           window.scrollTo({ top: 0, behavior: 'smooth' });
                         }} className="p-3 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl transition font-bold text-xs uppercase tracking-wider">
                           Edit
