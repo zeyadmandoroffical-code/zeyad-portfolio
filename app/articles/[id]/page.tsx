@@ -240,7 +240,7 @@ export default function ArticlePage() {
           )}
 
           {/* Premium Markdown Styling applied via prose classes defined in globals.css */}
-          <div className="prose prose-lg prose-neutral prose-blue max-w-none z-20 relative">
+          <div className="prose prose-lg max-w-none z-20 relative" dir="auto">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {article.content}
             </ReactMarkdown>
