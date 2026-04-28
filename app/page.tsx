@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Rocket, Users, Briefcase, ArrowRight, Star, MessageSquareQuote, ChevronDown } from "lucide-react";
+import { Rocket, Users, Briefcase, ArrowRight, Star, MessageSquareQuote, ChevronDown, Eye, Heart, Clock } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "@/utils/supabase";
 import Link from 'next/link';
@@ -12,6 +12,12 @@ const glassBase = "bg-white/30 backdrop-blur-[20px] will-change-transform border
 const glassHover = "transition-all duration-500 hover:scale-[1.03] hover:bg-white/40 hover:shadow-[0_12px_45px_0_rgba(31,38,135,0.1)] cursor-pointer";
 const glassCard = `${glassBase} ${glassHover}`;
 const springConfig = { type: "spring" as const, stiffness: 300, damping: 20 };
+
+const getReadingTime = (text: string) => {
+  if (!text) return 1;
+  const words = text.trim().split(/\s+/).length;
+  return Math.max(1, Math.ceil(words / 200));
+};
 
 const EditorialPhoto = ({ src }: { src: string | null }) => {
   const [loaded, setLoaded] = useState(false);
@@ -328,7 +334,14 @@ export default function Portfolio() {
                   <div className="flex flex-col flex-1">
                     <span className="text-xs font-bold uppercase text-blue-600 tracking-wider mb-2">{article.category}</span>
                     <h3 className="text-xl font-bold text-neutral-900 leading-tight mb-3">{article.title}</h3>
-                    <div className="mt-auto mb-2 pt-2 text-sm text-neutral-500 font-medium">{article.content?.substring(0, 80)}...</div>
+                    
+                    <div className="mt-auto pt-4 border-t border-black/5 flex items-center justify-between text-xs text-neutral-500 font-bold">
+                      <span className="flex items-center gap-1.5"><Clock size={14} /> {getReadingTime(article.content)} min</span>
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center gap-1"><Eye size={14} /> {article.views_count || 0}</span>
+                        <span className="flex items-center gap-1"><Heart size={14} className={(article.likes_count || 0) > 0 ? "fill-red-400 text-red-400" : ""} /> {article.likes_count || 0}</span>
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
               </Link>

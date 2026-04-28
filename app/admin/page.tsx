@@ -30,7 +30,7 @@ export default function AdminPage() {
 
   // Articles
   const [articles, setArticles] = useState<any[]>([]);
-  const [articleForm, setArticleForm] = useState({ title: '', category: '', image_url: '', content: '' });
+  const [articleForm, setArticleForm] = useState<any>({ id: null, title: '', category: '', image_url: '', content: '' });
 
   // Comments (pending, any article)
   const [pendingComments, setPendingComments] = useState<any[]>([]);
@@ -143,13 +143,20 @@ export default function AdminPage() {
   };
 
   // ── Article Actions ──────────────────────────────────────────────
-  const handleCreateArticle = async (e: React.FormEvent) => {
+  const handleCreateOrUpdateArticle = async (e: React.FormEvent) => {
     e.preventDefault(); setLoading(true); setStatusMessage('');
     try {
-      const { error } = await supabase.from('articles').insert([{ ...articleForm }]);
-      if (error) throw error;
-      setStatusMessage('✅ Article added!');
-      setArticleForm({ title: '', category: '', image_url: '', content: '' });
+      if (articleForm.id) {
+        const { id, ...updateData } = articleForm;
+        const { error } = await supabase.from('articles').update(updateData).eq('id', id);
+        if (error) throw error;
+        setStatusMessage('✅ Article updated!');
+      } else {
+        const { error } = await supabase.from('articles').insert([{ title: articleForm.title, category: articleForm.category, image_url: articleForm.image_url, content: articleForm.content }]);
+        if (error) throw error;
+        setStatusMessage('✅ Article added!');
+      }
+      setArticleForm({ id: null, title: '', category: '', image_url: '', content: '' });
       fetchArticles();
     } catch (err: any) { setStatusMessage(`❌ ${err.message}`); }
     finally { setLoading(false); }
@@ -251,26 +258,55 @@ export default function AdminPage() {
             {activeTab === 'articles' && (
               <div className="flex flex-col gap-8">
                 <div className={`p-8 md:p-10 ${glass}`}>
-                  <h2 className="text-2xl font-black mb-6 tracking-tight">Add New Article</h2>
-                  <form onSubmit={handleCreateArticle} className="flex flex-col gap-4">
-                    <input required value={articleForm.title} onChange={e => setArticleForm(p => ({ ...p, title: e.target.value }))} placeholder="Article Title *" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-bold" />
-                    <input required value={articleForm.category} onChange={e => setArticleForm(p => ({ ...p, category: e.target.value }))} placeholder="Category (e.g. Growth, SaaS) *" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-medium" />
-                    <input value={articleForm.image_url} onChange={e => setArticleForm(p => ({ ...p, image_url: e.target.value }))} placeholder="Image URL (optional)" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-medium" />
-                    <textarea required rows={6} value={articleForm.content} onChange={e => setArticleForm(p => ({ ...p, content: e.target.value }))} placeholder="Article Content *" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-medium resize-none" />
-                    <button type="submit" disabled={loading} className="bg-neutral-900 text-white font-black py-4 rounded-2xl uppercase tracking-widest hover:bg-black transition disabled:opacity-50">
-                      {loading ? 'Publishing…' : '✦ Publish Article'}
-                    </button>
+                  <h2 className="text-2xl font-black mb-6 tracking-tight">
+                    {articleForm.id ? 'Edit Article' : 'Add New Article'}
+                  </h2>
+                  <form onSubmit={handleCreateOrUpdateArticle} className="flex flex-col gap-4">
+                    <input required value={articleForm.title} onChange={e => setArticleForm(p => ({ ...p, title: e.target.value }))} placeholder="Article Title *" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-bold text-neutral-900" />
+                    <input required value={articleForm.category} onChange={e => setArticleForm(p => ({ ...p, category: e.target.value }))} placeholder="Category (e.g. Growth, SaaS) *" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-medium text-neutral-900" />
+                    <input value={articleForm.image_url} onChange={e => setArticleForm(p => ({ ...p, image_url: e.target.value }))} placeholder="Image URL (optional)" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-medium text-neutral-900" />
+                    
+                    <div className="relative">
+                      <div className="absolute top-4 right-4 text-[10px] font-black uppercase text-blue-500 bg-blue-50 px-2 py-1 rounded-md pointer-events-none">Markdown Supported</div>
+                      <textarea required rows={12} value={articleForm.content} onChange={e => setArticleForm(p => ({ ...p, content: e.target.value }))} placeholder="Paste your Article Markdown here... *" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-mono text-sm resize-y text-neutral-900" />
+                    </div>
+
+                    <div className="flex gap-4">
+                      <button type="submit" disabled={loading} className="flex-1 bg-neutral-900 text-white font-black py-4 rounded-2xl uppercase tracking-widest hover:bg-black transition disabled:opacity-50">
+                        {loading ? 'Publishing…' : (articleForm.id ? '✦ Update Article' : '✦ Publish Article')}
+                      </button>
+                      {articleForm.id && (
+                        <button type="button" onClick={() => setArticleForm({ id: null, title: '', category: '', image_url: '', content: '' })} className="px-8 bg-neutral-200 text-neutral-700 font-black py-4 rounded-2xl uppercase tracking-widest hover:bg-neutral-300 transition">
+                          Cancel
+                        </button>
+                      )}
+                    </div>
                   </form>
                 </div>
+                
                 <div className="flex flex-col gap-4">
                   <h2 className="text-2xl font-black tracking-tight">Published Articles ({articles.length})</h2>
                   {articles.map(a => (
-                    <div key={a.id} className="flex items-center justify-between p-5 bg-white/40 rounded-2xl border border-white/60 gap-4">
-                      <div className="min-w-0">
+                    <div key={a.id} className="flex items-center justify-between p-5 bg-white/40 rounded-2xl border border-white/60 gap-4 shadow-sm">
+                      <div className="min-w-0 flex-1">
                         <p className="font-black text-neutral-900 truncate">{a.title}</p>
-                        <p className="text-xs text-neutral-500 font-bold uppercase tracking-widest mt-1">{a.category}</p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <span className="text-xs text-blue-600 font-bold uppercase tracking-widest">{a.category}</span>
+                          <span className="text-xs text-neutral-500 font-medium flex items-center gap-1"><Eye size={12}/> {a.views_count || 0}</span>
+                          <span className="text-xs text-neutral-500 font-medium flex items-center gap-1"><Heart size={12}/> {a.likes_count || 0}</span>
+                        </div>
                       </div>
-                      <button onClick={() => handleDeleteArticle(a.id)} className="shrink-0 p-2 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl transition"><Trash2 size={16} /></button>
+                      <div className="flex gap-2 shrink-0">
+                        <button onClick={() => {
+                          setArticleForm({ id: a.id, title: a.title, category: a.category, image_url: a.image_url || '', content: a.content });
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }} className="p-3 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl transition font-bold text-xs uppercase tracking-wider">
+                          Edit
+                        </button>
+                        <button onClick={() => handleDeleteArticle(a.id)} className="p-3 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl transition">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
