@@ -12,124 +12,123 @@ body {
 
 /* ═══════════════════════════════════════════════════════════════
    PROSE / MARKDOWN — Premium Article Typography
-   Palette: Slate-Indigo (muted, refined — Business & AI)
+   Palette: Deep Slate + Warm Violet (refined, calm, premium)
    ════════════════════════════════════════════════════════════ */
 
-/* RTL / LTR Auto-direction: each block detects its own language */
+/* ── RTL / Bilingual auto-direction per block ──────────────── */
 .prose p,
 .prose li,
 .prose blockquote,
 .prose h1,
 .prose h2,
 .prose h3,
-.prose h4 {
+.prose h4,
+.prose td,
+.prose th {
   unicode-bidi: plaintext;
   text-align: start;
 }
 
-/* ── Base body text ──────────────────────────────────────────── */
+/* ── Base text ──────────────────────────────────────────────── */
 .prose {
-  color: #334155;            /* slate-700 — easier on the eyes than pure black */
+  color: #3d4450;
   font-size: 1.0625rem;
   line-height: 1.9;
 }
 
-/* ── Headings ────────────────────────────────────────────────── */
+/* ── Headings ───────────────────────────────────────────────── */
 .prose h1, .prose h2, .prose h3, .prose h4 {
   font-weight: 900;
-  letter-spacing: -0.03em;
-  color: #0f172a;            /* slate-900 */
-  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: #111827;
+  line-height: 1.25;
 }
 
 .prose h2 {
-  font-size: 1.75rem;
+  font-size: 1.65rem;
   margin-top: 2.75rem;
   margin-bottom: 0.875rem;
   padding-bottom: 0.625rem;
-  border-bottom: 1.5px solid #e2e8f0;  /* slate-200 */
+  border-bottom: 1.5px solid rgba(0,0,0,0.07);
+  color: #1a1f36;
 }
 
 .prose h3 {
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   margin-top: 2rem;
-  margin-bottom: 0.625rem;
-  color: #4f46e5;            /* indigo-600 — replaces harsh blue */
+  margin-bottom: 0.6rem;
+  color: #374151;
 }
 
 .prose h4 {
-  font-size: 1.05rem;
   margin-top: 1.5rem;
-  color: #475569;
+  color: #6b7280;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.09em;
 }
 
-/* ── Paragraphs ──────────────────────────────────────────────── */
+/* ── Paragraphs ─────────────────────────────────────────────── */
 .prose p {
-  color: #334155;
-  margin-bottom: 1.35rem;
-  font-size: 1.0625rem;
-  line-height: 1.9;
+  color: #3d4450;
+  margin-bottom: 1.3rem;
+  line-height: 1.95;
 }
 
-/* ── Bold & Italic ───────────────────────────────────────────── */
+/* ── Bold / Italic ──────────────────────────────────────────── */
 .prose strong {
-  color: #0f172a;            /* near-black for emphasis */
+  color: #111827;
   font-weight: 900;
 }
 
 .prose em {
-  color: #475569;
-  font-style: italic;
+  color: #4b5563;
 }
 
-/* ── Lists ───────────────────────────────────────────────────── */
-.prose ul, .prose ol {
-  padding-inline-start: 1.5rem; /* respects RTL automatically */
-  margin-bottom: 1.5rem;
+/* ── Lists — Full RTL support ───────────────────────────────── */
+.prose ul,
+.prose ol {
+  padding-inline-start: 1.6rem;
+  margin-bottom: 1.4rem;
+  margin-top: 0.5rem;
 }
 
-.prose ul li, .prose ol li {
-  color: #334155;
+.prose ul li,
+.prose ol li {
+  color: #3d4450;
   line-height: 1.85;
   margin-bottom: 0.45rem;
+  padding-inline-start: 0.25rem;
 }
 
 .prose ul li::marker {
-  color: #6366f1;            /* indigo-500 */
-  font-size: 1.1em;
+  color: #7c6af7;
+  font-size: 1em;
 }
 
 .prose ol li::marker {
-  color: #6366f1;
+  color: #7c6af7;
   font-weight: 900;
+  font-size: 0.95em;
 }
 
-/* ── Blockquotes — Premium Glassmorphism Callout ────────────── */
+/* ── Blockquotes — RTL-aware ────────────────────────────────── */
 .prose blockquote {
-  background: rgba(99, 102, 241, 0.05);    /* indigo tint */
-  border-inline-start: 4px solid #6366f1;  /* RTL-aware border */
-  border-radius: 0 1rem 1rem 0;
-  padding: 1.25rem 1.5rem;
-  margin: 2rem 0;
-  box-shadow: 0 4px 24px rgba(99, 102, 241, 0.07);
+  border-inline-start: 4px solid #7c6af7;
+  background: rgba(124, 106, 247, 0.05);
+  padding: 1.1rem 1.5rem;
+  margin: 1.75rem 0;
+  border-radius: 0 0.75rem 0.75rem 0;
+  box-shadow: 0 2px 16px rgba(124, 106, 247, 0.06);
   font-style: normal;
-}
-
-[dir="rtl"] .prose blockquote,
-.prose blockquote:where([dir="rtl"] *) {
-  border-radius: 1rem 0 0 1rem;
 }
 
 .prose blockquote p {
-  color: #3730a3;            /* indigo-800 — readable, not harsh */
+  color: #4c3d8f;
   font-weight: 600;
   font-style: normal;
-  margin-bottom: 0;
-  font-size: 1.05rem;
-  line-height: 1.75;
+  margin: 0;
+  line-height: 1.8;
 }
 
 .prose blockquote p::before,
@@ -137,136 +136,128 @@ body {
   content: '' !important;
 }
 
-/* ── Inline Code ─────────────────────────────────────────────── */
+/* ── Inline code ────────────────────────────────────────────── */
 .prose code:not(pre code) {
-  background: rgba(99, 102, 241, 0.07);
-  color: #4338ca;
+  background: rgba(124, 106, 247, 0.08);
+  color: #5b45d4;
   font-weight: 700;
-  padding: 0.15rem 0.5rem;
-  border-radius: 0.375rem;
-  font-size: 0.875em;
-  border: 1px solid rgba(99, 102, 241, 0.15);
-  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.35rem;
+  font-size: 0.85em;
+  border: 1px solid rgba(124, 106, 247, 0.15);
 }
 
-/* ── Code Blocks ─────────────────────────────────────────────── */
+/* ── Code blocks ────────────────────────────────────────────── */
 .prose pre {
-  background: #0f172a;       /* slate-900 */
-  border-radius: 1.25rem;
+  background: #0d1117;
+  border-radius: 1rem;
   padding: 1.5rem;
   overflow-x: auto;
-  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   margin: 1.75rem 0;
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.04);
 }
 
 .prose pre code {
-  color: #cbd5e1;            /* slate-300 */
+  color: #c9d1d9;
   font-size: 0.875rem;
   background: transparent !important;
   border: none !important;
   padding: 0 !important;
 }
 
-/* ── Horizontal Rule ─────────────────────────────────────────── */
+/* ── Horizontal rule ────────────────────────────────────────── */
 .prose hr {
   border: none;
-  border-top: 1.5px solid #e2e8f0;
-  margin: 2.5rem 0;
+  border-top: 1.5px solid rgba(0,0,0,0.07);
+  margin: 2.25rem 0;
 }
 
-/* ── Tables ──────────────────────────────────────────────────── */
+/* ── Tables ─────────────────────────────────────────────────── */
 .prose table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  border-radius: 1rem;
+  border-radius: 0.875rem;
   overflow: hidden;
   margin: 2rem 0;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.05);
-  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+  border: 1px solid #e5e7eb;
 }
 
 .prose thead th {
-  background: #f1f5ff;
-  color: #4338ca;
+  background: #f5f4ff;
+  color: #4c3d8f;
   font-weight: 900;
   font-size: 0.7rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 0.875rem 1.25rem;
   text-align: start;
-  border-bottom: 2px solid #e0e7ff;
+  border-bottom: 2px solid #ede9fe;
 }
 
-.prose tbody tr:hover {
-  background: #f8faff;
-}
-
-.prose tbody tr:nth-child(even) {
-  background: rgba(241, 245, 255, 0.5);
-}
+.prose tbody tr:hover { background: #faf9ff; }
+.prose tbody tr:nth-child(even) { background: rgba(245, 244, 255, 0.5); }
 
 .prose tbody td {
   padding: 0.875rem 1.25rem;
-  border-bottom: 1px solid #f1f5f9;
-  color: #334155;
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
   font-size: 0.9375rem;
 }
 
-/* ── Links — Elegant, non-aggressive ────────────────────────── */
+/* ── Links ──────────────────────────────────────────────────── */
 .prose a {
-  color: #4f46e5;            /* indigo-600 */
+  color: #5b45d4;
   font-weight: 600;
   text-decoration: none;
-  border-bottom: 1.5px dashed rgba(99, 102, 241, 0.35);
-  transition: all 0.2s ease;
+  border-bottom: 1.5px dashed rgba(124, 106, 247, 0.4);
+  transition: all 0.18s ease;
   padding-bottom: 1px;
 }
 
 .prose a::after {
   content: ' ↗';
-  font-size: 0.7em;
+  font-size: 0.68em;
   font-weight: 400;
-  opacity: 0.5;
+  opacity: 0.45;
   vertical-align: super;
-  transition: all 0.2s ease;
+  transition: opacity 0.18s;
 }
 
 .prose a:hover {
-  color: #3730a3;
-  border-bottom-color: #6366f1;
-  background: rgba(99, 102, 241, 0.05);
+  color: #4c3d8f;
+  border-bottom-color: #7c6af7;
+  background: rgba(124, 106, 247, 0.06);
   border-radius: 3px;
   padding-inline: 2px;
 }
 
 .prose a:hover::after {
-  opacity: 1;
+  opacity: 0.9;
 }
 
-/* ── Images ──────────────────────────────────────────────────── */
+/* ── Images ─────────────────────────────────────────────────── */
 .prose img {
   border-radius: 1.25rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  margin: 2rem auto;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.08);
+  margin: 1.75rem auto;
   display: block;
   max-width: 100%;
 }
 
-/* ── Nested list spacing ─────────────────────────────────────── */
+/* ── Nested lists ───────────────────────────────────────────── */
 .prose ul ul, .prose ol ol, .prose ul ol, .prose ol ul {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-top: 0.4rem;
+  margin-bottom: 0.4rem;
 }
 
 /* ═══════════════════════════════════════════════════════════════
    UTILITIES
    ════════════════════════════════════════════════════════════ */
 @layer utilities {
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
