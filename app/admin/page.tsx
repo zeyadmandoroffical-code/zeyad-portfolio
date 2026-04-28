@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/utils/supabase';
 import { GlobalBackground } from '@/components/GlobalBackground';
 import Image from 'next/image';
-import { Star, Trash2, CheckCircle, XCircle, ChevronUp, ChevronDown, Users } from 'lucide-react';
+import { Star, Trash2, CheckCircle, XCircle, ChevronUp, ChevronDown, Users, Eye, Heart } from 'lucide-react';
 
 const glass = "bg-white/30 backdrop-blur-[20px] will-change-transform border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.06)] rounded-[2.5rem]";
 
@@ -262,13 +262,13 @@ export default function AdminPage() {
                     {articleForm.id ? 'Edit Article' : 'Add New Article'}
                   </h2>
                   <form onSubmit={handleCreateOrUpdateArticle} className="flex flex-col gap-4">
-                    <input required value={articleForm.title} onChange={e => setArticleForm(p => ({ ...p, title: e.target.value }))} placeholder="Article Title *" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-bold text-neutral-900" />
-                    <input required value={articleForm.category} onChange={e => setArticleForm(p => ({ ...p, category: e.target.value }))} placeholder="Category (e.g. Growth, SaaS) *" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-medium text-neutral-900" />
-                    <input value={articleForm.image_url} onChange={e => setArticleForm(p => ({ ...p, image_url: e.target.value }))} placeholder="Image URL (optional)" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-medium text-neutral-900" />
+                    <input required value={articleForm.title} onChange={e => setArticleForm((p: any) => ({ ...p, title: e.target.value }))} placeholder="Article Title *" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-bold text-neutral-900" />
+                    <input required value={articleForm.category} onChange={e => setArticleForm((p: any) => ({ ...p, category: e.target.value }))} placeholder="Category (e.g. Growth, SaaS) *" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-medium text-neutral-900" />
+                    <input value={articleForm.image_url} onChange={e => setArticleForm((p: any) => ({ ...p, image_url: e.target.value }))} placeholder="Image URL (optional)" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-medium text-neutral-900" />
                     
                     <div className="relative">
                       <div className="absolute top-4 right-4 text-[10px] font-black uppercase text-blue-500 bg-blue-50 px-2 py-1 rounded-md pointer-events-none">Markdown Supported</div>
-                      <textarea required rows={12} value={articleForm.content} onChange={e => setArticleForm(p => ({ ...p, content: e.target.value }))} placeholder="Paste your Article Markdown here... *" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-mono text-sm resize-y text-neutral-900" />
+                      <textarea required rows={12} value={articleForm.content} onChange={e => setArticleForm((p: any) => ({ ...p, content: e.target.value }))} placeholder="Paste your Article Markdown here... *" className="w-full bg-white/50 border border-white/70 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 font-mono text-sm resize-y text-neutral-900" />
                     </div>
 
                     <div className="flex gap-4">

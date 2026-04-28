@@ -10,42 +10,202 @@ body {
   color: #171717;
 }
 
-/* Custom Elegant Links for Markdown */
-.prose a {
-  @apply text-neutral-800 font-bold no-underline relative transition-all duration-300;
-  border-bottom: 1px dashed theme('colors.neutral.400');
+/* ── Prose / Markdown Article Styling ─────────────────────────── */
+
+/* Headings */
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #0a0a0a;
+  line-height: 1.15;
 }
 
-.prose a:hover {
-  @apply text-blue-600;
-  border-bottom: 1px solid theme('colors.blue.500');
-  background: linear-gradient(120deg, transparent 0%, rgba(59, 130, 246, 0.1) 100%);
+.prose h2 {
+  font-size: 1.875rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(0,0,0,0.06);
+}
+
+.prose h3 {
+  font-size: 1.375rem;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: #1e40af;
+}
+
+/* Paragraph text */
+.prose p {
+  color: #374151;
+  line-height: 1.85;
+  font-size: 1.0625rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Bold text */
+.prose strong {
+  color: #111827;
+  font-weight: 900;
+}
+
+/* Italic */
+.prose em {
+  color: #374151;
+  font-style: italic;
+}
+
+/* Bullet / Numbered lists */
+.prose ul, .prose ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.prose ul li, .prose ol li {
+  color: #374151;
+  line-height: 1.85;
+  margin-bottom: 0.4rem;
+}
+
+.prose ul li::marker {
+  color: #3b82f6;
+  font-size: 1.2em;
+}
+
+.prose ol li::marker {
+  color: #3b82f6;
+  font-weight: 900;
+}
+
+/* Blockquotes — Glassmorphism callout style */
+.prose blockquote {
+  background: rgba(59, 130, 246, 0.06);
+  backdrop-filter: blur(10px);
+  border-left: 4px solid #3b82f6;
+  border-radius: 0 1rem 1rem 0;
+  padding: 1.25rem 1.5rem;
+  margin: 2rem 0;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08);
+  font-style: normal !important;
+}
+
+.prose blockquote p {
+  color: #1e40af;
+  font-weight: 600;
+  font-style: normal !important;
+  margin-bottom: 0;
+}
+
+.prose blockquote p::before, .prose blockquote p::after {
+  content: '' !important;
+}
+
+/* Inline code */
+.prose code:not(pre code) {
+  background: rgba(59, 130, 246, 0.08);
+  color: #1d4ed8;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.875em;
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+/* Code blocks */
+.prose pre {
+  background: #0f172a;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  overflow-x: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  margin: 1.75rem 0;
+}
+
+.prose pre code {
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+/* Horizontal rule */
+.prose hr {
+  border: none;
+  border-top: 2px solid rgba(0,0,0,0.07);
+  margin: 2.5rem 0;
+}
+
+/* Tables */
+.prose table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  margin: 2rem 0;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.prose thead th {
+  background: #f0f4ff;
+  color: #1e40af;
+  font-weight: 900;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 1rem 1.25rem;
+  text-align: left;
+  border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+}
+
+.prose tbody tr:nth-child(even) {
+  background: rgba(248,250,255,0.7);
+}
+
+.prose tbody td {
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  color: #374151;
+  font-size: 0.9375rem;
+}
+
+/* Elegant Links */
+.prose a {
+  color: #1d4ed8;
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1.5px dashed rgba(59, 130, 246, 0.4);
+  transition: all 0.2s ease;
+  padding-bottom: 1px;
 }
 
 .prose a::after {
-  content: '↗';
-  @apply inline-block ml-0.5 text-[0.8em] font-normal transition-transform duration-300;
+  content: ' ↗';
+  font-size: 0.75em;
+  font-weight: 400;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.prose a:hover {
+  color: #1e40af;
+  border-bottom-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 2px;
 }
 
 .prose a:hover::after {
-  @apply translate-x-0.5 -translate-y-0.5 text-blue-600;
+  opacity: 1;
+  transform: translate(1px, -1px);
 }
 
-/* Glassmorphism Blockquotes (TL;DR / Callouts) */
-.prose blockquote {
-  @apply bg-white/40 backdrop-blur-xl border-l-4 border-blue-500 shadow-sm rounded-r-xl p-4 my-6 font-medium text-neutral-700 italic not-italic;
-}
-
-.prose blockquote p:first-of-type::before {
-  content: '';
-}
-.prose blockquote p:last-of-type::after {
-  content: '';
-}
-
-/* Highlight Bold text subtly */
-.prose strong {
-  @apply text-neutral-900 font-black relative z-10;
+/* Images inside markdown */
+.prose img {
+  border-radius: 1.25rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  margin: 2rem auto;
+  display: block;
 }
 
 /* Hide scrollbar utilities for horizontal scrolling */
